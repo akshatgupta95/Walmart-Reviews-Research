@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <title>Subscribe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../static/bootstrap.min.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Walmart Mockup Reviews</h1>
+      <br>
+      <form method="post" action="/request_handler">
+        <label for="search_query"></label>
+        <input type="text" name="search_query", value="{{ request.form.search_query }}" />
+        
+        <input class="btn btn-default" type="submit" value="Search">
+      </form>
+    </div>
+
+
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <strong>Showing results for: </strong>{{ search_query_dict['search_query'] }} <br><br>
+                    <dl>
+                          {% for key, value in items_dict.iteritems() %}
+                                {{ loop.index }} <a href={{ value['item_url'] }}>{{ value['item_name'] }}</a>
+                                <span style="font-family: Arial Unicode MS, Lucida Grande"> &#9989; </span> 
+                                <span style="font-family: Arial Unicode MS, Lucida Grande"> &#10071; </span><br><br>
+                          {% endfor %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+  </body>
+</html>
