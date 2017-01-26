@@ -27,6 +27,7 @@ def make_api_call(search_query):
 		item_name = item['name']
 		item_url = item['productUrl']
 		item_id = item['itemId']
+		item_description = item['longDescription']
 		review_url = "http://api.walmartlabs.com/v1/reviews/%s?apiKey=vydf8ym75f468rbgwy5k5xwp&format=json" % str(item_id)
 		review_data = json.load(urllib2.urlopen(review_url))
 		reviews = []
