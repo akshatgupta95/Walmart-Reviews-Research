@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <title>Reviews</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../static/bootstrap.min.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <strong>Showing results for keyword: </strong>{{ reviews_dict['review_query'] }} <br><br>
+                    <dl>
+                          {% for review in reviews_dict['reviews'] %}
+                                <b>{{ loop.index }}</b>
+                                {{ review }}<br><br>
+                          {% endfor %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+  </body>
+</html>

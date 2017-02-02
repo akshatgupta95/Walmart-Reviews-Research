@@ -61,8 +61,7 @@ def review_request_handler(review_item_id):
 	review_query = request.form['review_query']
 	reviews_dict = make_product_reviews_api_call(review_item_id)
 	reviews_dict['review_query'] = review_query
-	print (reviews_dict)
-	return render_template('search.html', items_dict={}, search_query_dict={})
+	return render_template('reviews.html', reviews_dict=reviews_dict)
 
 if __name__ == '__main__':
 	app.run(debug=True)
