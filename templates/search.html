@@ -25,8 +25,15 @@
                     <dl>
                           {% for key, value in items_dict.iteritems() %}
                                 {{ loop.index }} <a href={{ value['item_url'] }}>{{ value['item_name'] }}</a>
-                                <span style="font-family: Arial Unicode MS, Lucida Grande"> &#9989; </span> 
-                                <span style="font-family: Arial Unicode MS, Lucida Grande"> &#10071; </span><br><br>
+                                {{ value['item_description']|safe }}
+                                <form method="post" action={{ url_for('review_request_handler', review_item_id=value['item_id']) }}>
+                                  <label for="review_query"></label>
+                                  <input type="text" name="review_query", value="{{ request.form.review_query }}" />
+                                  
+                                  <input class="btn btn-default" type="submit" value="Search Reviews">
+                                </form>
+                                <!-- <span style="font-family: Arial Unicode MS, Lucida Grande"> &#9989; </span> 
+                                <span style="font-family: Arial Unicode MS, Lucida Grande"> &#10071; </span><br><br> -->
                           {% endfor %}
                     </dl>
                 </div>

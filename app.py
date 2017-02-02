@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, g
 import os
 import json
 import urllib2
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
@@ -28,6 +29,7 @@ def make_api_call(search_query):
 		item_url = item['productUrl']
 		item_id = item['itemId']
 		item_description = item['longDescription']
+		item_description = BeautifulSoup(item_description).text
 		review_url = "http://api.walmartlabs.com/v1/reviews/%s?apiKey=vydf8ym75f468rbgwy5k5xwp&format=json" % str(item_id)
 		review_data = json.load(urllib2.urlopen(review_url))
 		reviews = []
@@ -36,8 +38,10 @@ def make_api_call(search_query):
 
 		return_dict[item_id] = {
 			'item_name' : item_name,
+			'item_id' : item_id,
 			'item_url' : item_url,
-			'reviews' : reviews
+			'reviews' : reviews,
+			'item_description' : item_description,
 		}
 
 	return return_dict
@@ -48,6 +52,13 @@ def request_handler():
 	items_dict = make_api_call(search_query)
 	search_query_dict={'search_query' : search_query}
 	return render_template('search.html', items_dict=items_dict, search_query_dict=search_query_dict)
+
+
+@app.route('/review_request_handler/<string:review_item_id>', methods=['POST'])
+def review_request_handler(review_item_id):
+	review_query = request.form['review_query']
+	print (review_query, review_item_id)
+	return render_template('search.html', items_dict={}, search_query_dict={})
 
 if __name__ == '__main__':
 	app.run(debug=True)
