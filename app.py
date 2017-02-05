@@ -4,6 +4,8 @@ import json
 import urllib2
 from bs4 import BeautifulSoup
 
+from indexer import Indexer
+
 app = Flask(__name__)
 
 sec_k = os.urandom(24)
@@ -46,6 +48,11 @@ def make_product_reviews_api_call(item_id):
 	review_data = json.load(urllib2.urlopen(review_url))
 	for review in review_data['reviews']:
 		reviews.append(review['reviewText'])
+
+	print ('Indexing Reviews...')
+	indexer = Indexer(reviews)
+	indexer.index_documents()
+	print ('Done Indexing Reviews.')
 	return {'reviews' : reviews}
 
 @app.route('/request_handler', methods=['GET', 'POST'])
