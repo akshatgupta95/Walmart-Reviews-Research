@@ -53,7 +53,7 @@ def make_product_reviews_api_call(item_id):
 	indexer = Indexer(reviews)
 	indexer.index_documents()
 	print ('Done Indexing Reviews.')
-	return {'reviews' : reviews}
+	return reviews
 
 @app.route('/request_handler', methods=['GET', 'POST'])
 def request_handler():
@@ -66,8 +66,17 @@ def request_handler():
 @app.route('/review_request_handler/<string:review_item_id>', methods=['POST'])
 def review_request_handler(review_item_id):
 	review_query = request.form['review_query']
-	reviews_dict = make_product_reviews_api_call(review_item_id)
-	reviews_dict['review_query'] = review_query
+	reviews = make_product_reviews_api_call(review_item_id)
+
+	reviews_dict = {'review_query' : review_query, 'reviews' : []}
+
+	indexer = Indexer()
+	retrieved_review_ids = indexer.get_docs(review_query)
+
+	for review_id in retrieved_review_ids:
+		reviews_dict['reviews'].append(
+			reviews[review_id]
+		)
 	return render_template('reviews.html', reviews_dict=reviews_dict)
 
 if __name__ == '__main__':

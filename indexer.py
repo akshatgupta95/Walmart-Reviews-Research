@@ -43,6 +43,7 @@ class Indexer:
 	def _get_docs_simple_query(self, search_query):
 	    with open('inv_idx.pickle', 'rb') as f:
 	    	inv_idx = pickle.load(f)
+
 	    query_terms = [
 	        re.sub(r'[^\w\s]','',q).lower()
 	        for q in search_query.split(' ')
@@ -96,7 +97,7 @@ class Indexer:
 			pickle.dump(inv_idx, f)
 
 	def get_docs(self, search_query, search_type='simple_query'):
-	    if search_type=='simple_query' or len(search_query.split(' ')) < 2:
-	        return _get_docs_simple_query(search_query)
-	    else:
-	        return _get_docs_phrase_query(search_query)
+		if search_type=='simple_query' or len(search_query.split(' ')) < 2:
+			return self._get_docs_simple_query(search_query)
+		else:
+			return self._get_docs_phrase_query(search_query)
