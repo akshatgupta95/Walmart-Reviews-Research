@@ -20,31 +20,35 @@ def index():
 def search():
 	return render_template('search.html')
 
-def process_item_description(it_d):
+def process_multi_word_links(new_text):
+	new_text_list = new_text.split(' ')
+	new_text_list = ['<a href="#">' + n + '</a>' for n in new_text_list]
+	new_text = ' '.join(new_text_list)
+	return new_text
+
+def process_item_description(item_description):
     i = 0
-    new_it_d = ""
+    new_item_description = ""
     non_htmls = []
-    while (i < len(it_d)):
-        if it_d[i] == '<':
-            while (it_d[i] != '>'):
-                new_it_d += it_d[i]
+    while (i < len(item_description)):
+        if item_description[i] == '<':
+            while (item_description[i] != '>'):
+                new_item_description += item_description[i]
                 i += 1
-            new_it_d += it_d[i]
+            new_item_description += item_description[i]
             i += 1
-            if (i > len(it_d)):
+            if (i > len(item_description)):
                 break
             else:
                 continue
         else:
             new_text = ""
-            while (i < len(it_d) and it_d[i] != '<'):
-                new_text += it_d[i]
+            while (i < len(item_description) and item_description[i] != '<'):
+                new_text += item_description[i]
                 i += 1
-            new_text_list = new_text.split(' ')
-            new_text_list = ['<a href="#">' + n + '</a>' for n in new_text_list]
-            new_text = ' '.join(new_text_list)
-            new_it_d += new_text
-    return new_it_d
+            new_text = process_multi_word_links(new_text)
+            new_item_description += new_text
+    return new_item_description
 
 def make_product_loopkup_api_call(search_query):
 	search_query = search_query.replace(' ', '%20')
