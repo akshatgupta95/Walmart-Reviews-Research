@@ -20,16 +20,24 @@ def index():
 def search():
 	return render_template('search.html')
 
-def process_multi_word_links(new_text):
+def process_multi_word_links(new_text, item_id):
+	_ = make_product_reviews_api_call(item_id)
+
 	new_text_list = new_text.split(' ')
-	new_text_list = ['<a href="#">' + n + '</a>' for n in new_text_list]
-	new_text = ' '.join(new_text_list)
+	links_list = []
+	for n in new_text_list:
+		indexer = Indexer()
+		retrieved_docs = indexer.get_docs(n, item_id=item_id)
+		if len(retrieved_docs) > 0:
+			n = '<a href="' + '/review_query_request_handler/%s/%s' % (item_id, n) + '">' + n + '</a>'
+		links_list.append(n)
+	new_text = ' '.join(links_list)
+
 	return new_text
 
-def process_item_description(item_description):
+def process_item_description(item_description, item_id):
     i = 0
     new_item_description = ""
-    non_htmls = []
     while (i < len(item_description)):
         if item_description[i] == '<':
             while (item_description[i] != '>'):
@@ -46,7 +54,7 @@ def process_item_description(item_description):
             while (i < len(item_description) and item_description[i] != '<'):
                 new_text += item_description[i]
                 i += 1
-            new_text = process_multi_word_links(new_text)
+            new_text = process_multi_word_links(new_text, item_id)
             new_item_description += new_text
     return new_item_description
 
@@ -62,7 +70,7 @@ def make_product_loopkup_api_call(search_query):
 		item_id = item['itemId']
 		item_description = item['longDescription']
 		item_description = BeautifulSoup(item_description).text
-		item_description = process_item_description(item_description)
+		item_description = process_item_description(item_description, item_id)
 
 		return_dict[item_id] = {
 			'item_name' : item_name,
@@ -80,10 +88,8 @@ def make_product_reviews_api_call(item_id):
 	for review in review_data['reviews']:
 		reviews.append(review['reviewText'])
 
-	print ('Indexing Reviews...')
-	indexer = Indexer(reviews)
+	indexer = Indexer(reviews, item_id)
 	indexer.index_documents()
-	print ('Done Indexing Reviews.')
 	return reviews
 
 @app.route('/request_handler', methods=['GET', 'POST'])
@@ -102,7 +108,22 @@ def review_request_handler(review_item_id):
 	reviews_dict = {'review_query' : review_query, 'reviews' : []}
 
 	indexer = Indexer()
-	retrieved_review_ids = indexer.get_docs(review_query)
+	retrieved_review_ids = indexer.get_docs(review_query, item_id=review_item_id)
+
+	for review_id in retrieved_review_ids:
+		reviews_dict['reviews'].append(
+			reviews[review_id]
+		)
+	return render_template('reviews.html', reviews_dict=reviews_dict)
+
+@app.route('/review_query_request_handler/<string:review_item_id>/<string:review_query>')
+def review_query_request_handler(review_item_id, review_query):
+	reviews = make_product_reviews_api_call(review_item_id)
+
+	reviews_dict = {'review_query' : review_query, 'reviews' : []}
+
+	indexer = Indexer()
+	retrieved_review_ids = indexer.get_docs(review_query, item_id=review_item_id)
 
 	for review_id in retrieved_review_ids:
 		reviews_dict['reviews'].append(

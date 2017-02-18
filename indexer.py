@@ -5,8 +5,9 @@ import re
 
 class Indexer:
 
-	def __init__(self, docs=None):
+	def __init__(self, docs=None, item_id=None):
 		self.docs = docs
+		self.item_id = item_id
 
 	def create_term_to_pos_for_doc(self, doc_id):
 		term_to_pos = {}
@@ -40,64 +41,67 @@ class Indexer:
 					inverted_index[term] = {doc_id : pos}
 		return inverted_index
 
-	def _get_docs_simple_query(self, search_query):
-	    with open('inv_idx.pickle', 'rb') as f:
-	    	inv_idx = pickle.load(f)
+	def _get_docs_simple_query(self, search_query, item_id):
+		file_name = 'inv_idx%s.pickle' % item_id
+		with open(file_name, 'rb') as f:
+			inv_idx = pickle.load(f)
 
-	    query_terms = [
-	        re.sub(r'[^\w\s]','',q).lower()
-	        for q in search_query.split(' ')
-	    ]
-	    retrieved_docs = []
-	    for q_term in query_terms:
-	        retrieved_docs.extend(
-	            inv_idx[q_term].keys()
-	        )
-	    return list(set(retrieved_docs))
+		query_terms = [
+			re.sub(r'[^\w\s]','',q).lower()
+			for q in search_query.split(' ')
+		]
+		retrieved_docs = []
+		for q_term in query_terms:
+			retrieved_docs.extend(
+				inv_idx[q_term].keys()
+			)
+		return list(set(retrieved_docs))
 
-	def _get_docs_phrase_query(self, search_query):
-	    with open('inv_idx.pickle', 'rb') as f:
-	    	inv_idx = pickle.load(f)
-	    query_terms = [
-	        re.sub(r'[^\w\s]','',q).lower()
-	        for q in search_query.split(' ')
-	    ]
+	def _get_docs_phrase_query(self, search_query, item_id):
+		file_name = 'inv_idx%s.pickle' % item_id
+		with open(file_name, 'rb') as f:
+			inv_idx = pickle.load(f)
+		query_terms = [
+			re.sub(r'[^\w\s]','',q).lower()
+			for q in search_query.split(' ')
+		]
 	    
-	    docs_to_pos = defaultdict(list)
-	    for q_term in query_terms:
-	        docs_to_pos_q_term = inv_idx[q_term]
-	        for doc_id in docs_to_pos_q_term.keys():
-	            if doc_id in docs_to_pos.keys():
-	                docs_to_pos[doc_id].append(docs_to_pos_q_term[doc_id])
-	            else:
-	                docs_to_pos[doc_id] = [docs_to_pos_q_term[doc_id]]
+		docs_to_pos = defaultdict(list)
+		for q_term in query_terms:
+			docs_to_pos_q_term = inv_idx[q_term]
+			for doc_id in docs_to_pos_q_term.keys():
+				if doc_id in docs_to_pos.keys():
+					docs_to_pos[doc_id].append(docs_to_pos_q_term[doc_id])
+				else:
+					docs_to_pos[doc_id] = [docs_to_pos_q_term[doc_id]]
 
-	    for doc_id in docs_to_pos.keys():
-	        pos = docs_to_pos[doc_id]
-	        for idx, pos_list in enumerate(pos):
-	            for i in range(len(pos_list)):
-	                pos_list[i] -= idx
+		for doc_id in docs_to_pos.keys():
+			pos = docs_to_pos[doc_id]
+			for idx, pos_list in enumerate(pos):
+				for i in range(len(pos_list)):
+					pos_list[i] -= idx
 	    
-	    retrieved_docs = []
+		retrieved_docs = []
 	    
-	    for doc_id in docs_to_pos.keys():
-	        pos_list = docs_to_pos[doc_id]
-	        if len(pos_list) >= 2:
-	            intersection = set(pos_list[0])
-	            for p in pos_list[1:]:
-	                intersection = intersection & set(p)
-	            if len(intersection) >= 1:
-	                retrieved_docs.append(doc_id)
+		for doc_id in docs_to_pos.keys():
+			pos_list = docs_to_pos[doc_id]
+			if len(pos_list) >= 2:
+				intersection = set(pos_list[0])
+				for p in pos_list[1:]:
+					intersection = intersection & set(p)
+				if len(intersection) >= 1:
+					retrieved_docs.append(doc_id)
 	                
-	    return retrieved_docs
+		return retrieved_docs
 
 	def index_documents(self):
 		inv_idx = self.create_inverted_index()
-		with open('inv_idx.pickle', 'wb') as f:
+		file_name = 'inv_idx%s.pickle' % self.item_id
+		with open(file_name, 'wb') as f:
 			pickle.dump(inv_idx, f)
 
-	def get_docs(self, search_query, search_type='simple_query'):
+	def get_docs(self, search_query, search_type='simple_query', item_id=None):
 		if search_type=='simple_query' or len(search_query.split(' ')) < 2:
-			return self._get_docs_simple_query(search_query)
+			return self._get_docs_simple_query(search_query, item_id)
 		else:
-			return self._get_docs_phrase_query(search_query)
+			return self._get_docs_phrase_query(search_query, item_id)
