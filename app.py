@@ -20,6 +20,32 @@ def index():
 def search():
 	return render_template('search.html')
 
+def process_item_description(it_d):
+    i = 0
+    new_it_d = ""
+    non_htmls = []
+    while (i < len(it_d)):
+        if it_d[i] == '<':
+            while (it_d[i] != '>'):
+                new_it_d += it_d[i]
+                i += 1
+            new_it_d += it_d[i]
+            i += 1
+            if (i > len(it_d)):
+                break
+            else:
+                continue
+        else:
+            new_text = ""
+            while (i < len(it_d) and it_d[i] != '<'):
+                new_text += it_d[i]
+                i += 1
+            new_text_list = new_text.split(' ')
+            new_text_list = ['<a href="#">' + n + '</a>' for n in new_text_list]
+            new_text = ' '.join(new_text_list)
+            new_it_d += new_text
+    return new_it_d
+
 def make_product_loopkup_api_call(search_query):
 	search_query = search_query.replace(' ', '%20')
 	url = "http://api.walmartlabs.com/v1/search?apiKey=vydf8ym75f468rbgwy5k5xwp&query=" + search_query
@@ -32,6 +58,7 @@ def make_product_loopkup_api_call(search_query):
 		item_id = item['itemId']
 		item_description = item['longDescription']
 		item_description = BeautifulSoup(item_description).text
+		item_description = process_item_description(item_description)
 
 		return_dict[item_id] = {
 			'item_name' : item_name,
