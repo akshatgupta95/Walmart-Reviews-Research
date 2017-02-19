@@ -11,6 +11,7 @@ app = Flask(__name__)
 sec_k = os.urandom(24)
 app.secret_key = sec_k
 
+item_ids_to_reviews = {}
 
 @app.route('/')
 def index():
@@ -21,8 +22,6 @@ def search():
 	return render_template('search.html')
 
 def process_multi_word_links(new_text, item_id):
-	_ = make_product_reviews_api_call(item_id)
-
 	new_text_list = new_text.split(' ')
 	links_list = []
 	for n in new_text_list:
@@ -70,6 +69,8 @@ def make_product_loopkup_api_call(search_query):
 		item_id = item['itemId']
 		item_description = item['longDescription']
 		item_description = BeautifulSoup(item_description).text
+		item_reviews = make_product_reviews_api_call(item_id)
+		item_ids_to_reviews[str(item_id)] = item_reviews
 		item_description = process_item_description(item_description, item_id)
 
 		return_dict[item_id] = {
@@ -103,7 +104,7 @@ def request_handler():
 @app.route('/review_request_handler/<string:review_item_id>', methods=['POST'])
 def review_request_handler(review_item_id):
 	review_query = request.form['review_query']
-	reviews = make_product_reviews_api_call(review_item_id)
+	reviews = item_ids_to_reviews[review_item_id]
 
 	reviews_dict = {'review_query' : review_query, 'reviews' : []}
 
@@ -118,7 +119,7 @@ def review_request_handler(review_item_id):
 
 @app.route('/review_query_request_handler/<string:review_item_id>/<string:review_query>')
 def review_query_request_handler(review_item_id, review_query):
-	reviews = make_product_reviews_api_call(review_item_id)
+	reviews = item_ids_to_reviews[review_item_id]
 
 	reviews_dict = {'review_query' : review_query, 'reviews' : []}
 
