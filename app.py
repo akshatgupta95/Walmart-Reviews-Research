@@ -34,6 +34,31 @@ def process_multi_word_links(new_text, item_id):
 
 	return new_text
 
+def process_multi_word_links_modified(new_text, item_id):
+	new_text_list = new_text.split(' ')
+	links_list = []
+	window_size = 2
+	i = 0
+	while (i < len(new_text_list)):
+		best_word = new_text_list[i]
+		curr_word = ""
+		for k in range(1, window_size+1):
+			curr_word = ' '.join(new_text_list[i:i+k])
+			indexer = Indexer()
+			retrieved_docs = indexer.get_docs(curr_word, item_id=item_id)
+			if len(retrieved_docs) > 0:
+				curr_word = '<a href="' + '/review_query_request_handler/%s/%s' % (item_id, curr_word) + '">' + curr_word + '</a>'
+				best_word = curr_word
+			else:
+				break
+		links_list.append(best_word)
+		if k != 1:
+			i += k-1
+		else:
+			i += 1
+	new_text = ' '.join(links_list)
+	return new_text
+
 def process_item_description(item_description, item_id):
     i = 0
     new_item_description = ""
@@ -53,8 +78,9 @@ def process_item_description(item_description, item_id):
             while (i < len(item_description) and item_description[i] != '<'):
                 new_text += item_description[i]
                 i += 1
-            new_text = process_multi_word_links(new_text, item_id)
+            new_text = process_multi_word_links_modified(new_text, item_id)
             new_item_description += new_text
+    print ('done')
     return new_item_description
 
 def make_product_loopkup_api_call(search_query):

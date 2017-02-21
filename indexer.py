@@ -100,7 +100,7 @@ class Indexer:
 		with open(file_name, 'wb') as f:
 			pickle.dump(inv_idx, f)
 
-	def get_docs(self, search_query, search_type='simple_query', item_id=None):
+	def get_docs(self, search_query, search_type='phrase_query', item_id=None):
 		if search_type=='simple_query' or len(search_query.split(' ')) < 2:
 			return self._get_docs_simple_query(search_query, item_id)
 		else:
