@@ -69,11 +69,17 @@ class Indexer:
 		docs_to_pos = defaultdict(list)
 		for q_term in query_terms:
 			docs_to_pos_q_term = inv_idx[q_term]
+			if len(docs_to_pos_q_term) == 0:
+				return []
 			for doc_id in docs_to_pos_q_term.keys():
 				if doc_id in docs_to_pos.keys():
 					docs_to_pos[doc_id].append(docs_to_pos_q_term[doc_id])
 				else:
 					docs_to_pos[doc_id] = [docs_to_pos_q_term[doc_id]]
+
+		for k in docs_to_pos.keys():
+			if len(docs_to_pos[k]) < len(query_terms):
+				docs_to_pos.pop(k, None)
 
 		for doc_id in docs_to_pos.keys():
 			pos = docs_to_pos[doc_id]
