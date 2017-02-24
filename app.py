@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, g
+from nltk.corpus import stopwords
 import os
 import json
 import urllib2
@@ -13,6 +14,8 @@ app.secret_key = sec_k
 
 item_ids_to_reviews = {}
 
+stop = set(stopwords.words('english'))
+
 @app.route('/')
 def index():
 	return render_template('search.html', items_dict={}, search_query_dict={})
@@ -25,10 +28,13 @@ def process_multi_word_links(new_text, item_id):
 	new_text_list = new_text.split(' ')
 	links_list = []
 	for n in new_text_list:
+		if n in stop:
+			links_list.append(n)
+			continue
 		indexer = Indexer()
 		retrieved_docs = indexer.get_docs(n, item_id=item_id)
 		if len(retrieved_docs) > 0:
-			n = '<a href="' + '/review_query_request_handler/%s/%s' % (item_id, n) + '">' + n + '</a>'
+			n = '<a target="_blank" href="' + '/review_query_request_handler/%s/%s' % (item_id, n) + '">' + n + '</a>'
 		links_list.append(n)
 	new_text = ' '.join(links_list)
 
@@ -41,6 +47,10 @@ def process_multi_word_links_modified(new_text, item_id):
 	i = 0
 	while (i < len(new_text_list)):
 		txt_windows = [' '.join(new_text_list[i:i+k+1]) for k in range(window_size)]
+		if txt_windows[0] in stop:
+			links_list.append(txt_windows[0])
+			i += 1
+			continue
 		indexer = Indexer()
 		retrieved_docs = indexer.get_docs(txt_windows[0], item_id=item_id)
 		if len(retrieved_docs) == 0:
@@ -52,7 +62,7 @@ def process_multi_word_links_modified(new_text, item_id):
 				retrieved_docs = indexer.get_docs(txt, item_id=item_id)
 				if len(retrieved_docs) > 0:
 					i += 1
-					links_list[-1] = '<a href="' + '/review_query_request_handler/%s/%s' % (item_id, txt) + '">' + txt + '</a>'
+					links_list[-1] = '<a target="_blank" href="' + '/review_query_request_handler/%s/%s' % (item_id, txt) + '">' + txt + '</a>'
 				else:
 					break
 	new_text = ' '.join(links_list)

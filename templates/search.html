@@ -24,7 +24,7 @@
                     <strong>Showing results for: </strong>{{ search_query_dict['search_query'] }} <br><br>
                     <dl>
                           {% for key, value in items_dict.iteritems() %}
-                                {{ loop.index }} <a href={{ value['item_url'] }}>{{ value['item_name'] }}</a>
+                                {{ loop.index }} <a target="_blank" href={{ value['item_url'] }}>{{ value['item_name'] }}</a>
                                 {{ value['item_description']|safe }}
                                 <form method="post" action={{ url_for('review_request_handler', review_item_id=value['item_id']) }}>
                                   <label for="review_query"></label>
