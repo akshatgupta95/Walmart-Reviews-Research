@@ -1,8 +1,8 @@
 [Done] Stop words removal
-	- If a word is a common stop word (based on the nltk english corpus), then do not create a link for that.
+	- [.] If a word is a common stop word (based on the nltk english corpus), then do not create a link for that.
 
 Phrase Querying based on proxomity
-	- Perform phrase querying for consecutive appearance of words.
+	- [.] Perform phrase querying for consecutive appearance of words.
 	- Perform phrase querying using a pre set proximity.
 
 Review Summarization
