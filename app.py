@@ -5,6 +5,7 @@ import json
 import urllib2
 from bs4 import BeautifulSoup
 
+from mutual_information import MutualInformation
 from indexer import Indexer
 
 app = Flask(__name__)
@@ -142,7 +143,9 @@ def review_request_handler(review_item_id):
 	review_query = request.form['review_query']
 	reviews = item_ids_to_reviews[review_item_id]
 
-	reviews_dict = {'review_query' : review_query, 'reviews' : []}
+	mutual_info = MutualInformation(txt_data=reviews, search_query=review_query)
+
+	reviews_dict = {'review_query' : review_query, 'reviews' : [], 'summary' : mutual_info.summary}
 
 	indexer = Indexer()
 	retrieved_review_ids = indexer.get_docs(review_query, item_id=review_item_id)
@@ -151,13 +154,16 @@ def review_request_handler(review_item_id):
 		reviews_dict['reviews'].append(
 			reviews[review_id]
 		)
+
 	return render_template('reviews.html', reviews_dict=reviews_dict)
 
 @app.route('/review_query_request_handler/<string:review_item_id>/<string:review_query>')
 def review_query_request_handler(review_item_id, review_query):
 	reviews = item_ids_to_reviews[review_item_id]
 
-	reviews_dict = {'review_query' : review_query, 'reviews' : []}
+	mutual_info = MutualInformation(txt_data=reviews, search_query=review_query)
+
+	reviews_dict = {'review_query' : review_query, 'reviews' : [], 'summary' : mutual_info.summary}
 
 	indexer = Indexer()
 	retrieved_review_ids = indexer.get_docs(review_query, item_id=review_item_id)

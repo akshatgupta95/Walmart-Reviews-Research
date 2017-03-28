@@ -13,8 +13,10 @@ class MutualInformation:
 	def __init__(self, txt_data=None, search_query=None):
 		self.txt_data = txt_data
 		self.info_pairs = self._process_txt()
+		self.search_query = search_query
+		self.summary = self._get_search_query_summary()
 
-	def _process_txt():
+	def _process_txt(self):
 		vocab = set()
 		doc_term = defaultdict(dict)
 		for txt in self.txt_data:
@@ -33,12 +35,12 @@ class MutualInformation:
 				if word in terms:
 					doc_term[doc_id][word] = 1
 
-		return self._get_info(
+		return self._get_info_pairs(
 			doc_term=doc_term,
 			vocab=vocab
 		)
 
-	def _get_info_pairs(doc_term=None, vocab=None):
+	def _get_info_pairs(self, doc_term=None, vocab=None):
 		N = len(doc_term.keys())
 
 		info_pairs = defaultdict(dict)
@@ -93,7 +95,7 @@ class MutualInformation:
 		return info_pairs
 
 
-	def get_search_query_summary():
+	def _get_search_query_summary(self):
 		search_terms = self.search_query.split(' ')
 		all_info = defaultdict(int)
 		for s_t in search_terms:
@@ -105,14 +107,14 @@ class MutualInformation:
 				all_info[word] += 1
 		info = [c[0] for c in sorted(all_info.items(), key=lambda x:x[1], reverse=True)[:10]]
 
-		return _get_summary(info)
+		return self._get_summary(info)
 
 
-	def _get_summary(info):
+	def _get_summary(self, info):
 		word_counts = defaultdict(int)
 		for word in info:
 			count = 0
-			for txt in txt_data:
+			for txt in self.txt_data:
 				terms = [re.sub(r'[^\w\s]','',s).lower() for s in txt.split(' ')]
 				for term in terms:
 					if term == word:
@@ -123,4 +125,4 @@ class MutualInformation:
 			if word in stop:
 				summary_words_counts.remove(summary_word_count)
 
-		return ' '.join([s[0] for s in summary_words_counts])
+		return ' '.join([s[0].strip() for s in summary_words_counts])
