@@ -14,7 +14,7 @@ class Indexer:
 		term_to_pos = {}
 		terms = [re.sub(r'[^\w\s]','',s).lower() for s in self.docs[doc_id].split(' ')]
 		for idx, term in enumerate(terms):
-	 		if term in term_to_pos:
+			if term in term_to_pos:
 				term_to_pos[term].append(idx)
 			else:
 				term_to_pos[term] = [idx]
@@ -66,7 +66,7 @@ class Indexer:
 			re.sub(r'[^\w\s]','',q).lower()
 			for q in search_query.split(' ')
 		]
-	    
+		
 		docs_to_pos = defaultdict(list)
 		for q_term in query_terms:
 			docs_to_pos_q_term = inv_idx[q_term]
@@ -87,9 +87,9 @@ class Indexer:
 			for idx, pos_list in enumerate(pos):
 				for i in range(len(pos_list)):
 					pos_list[i] -= idx
-	    
+		
 		retrieved_docs = []
-	    
+		
 		for doc_id in docs_to_pos.keys():
 			pos_list = docs_to_pos[doc_id]
 			if len(pos_list) >= 2:
@@ -98,7 +98,7 @@ class Indexer:
 					intersection = intersection & set(p)
 				if len(intersection) >= 1:
 					retrieved_docs.append(doc_id)
-	                
+					
 		return retrieved_docs
 
 	def _get_docs_phrase_query_word_range(self, search_query, item_id, word_range=1):
@@ -109,7 +109,7 @@ class Indexer:
 			re.sub(r'[^\w\s]','',q).lower()
 			for q in search_query.split(' ')
 		]
-	    
+		
 		docs_to_pos = defaultdict(list)
 		for q_term in query_terms:
 			docs_to_pos_q_term = inv_idx[q_term]
@@ -121,10 +121,10 @@ class Indexer:
 				else:
 					docs_to_pos[doc_id] = [docs_to_pos_q_term[doc_id]]
 
-		for k in docs_to_pos.keys():
+		for k in list(docs_to_pos):
 			if len(docs_to_pos[k]) < len(query_terms):
 				docs_to_pos.pop(k, None)
-	    
+		
 		retrieved_docs = []
 
 		for doc_id in docs_to_pos.keys():
@@ -145,7 +145,7 @@ class Indexer:
 					if max(x_values) - min(x_values) <= word_range:
 						retrieved_docs.append(doc_id)
 						break
-	                
+					
 		return retrieved_docs
 
 	def index_documents(self):

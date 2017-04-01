@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, g
 from nltk.corpus import stopwords
 import os
 import json
-import urllib2
+from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
 from mutual_information import MutualInformation
@@ -97,7 +97,7 @@ def process_item_description(item_description, item_id):
 def make_product_loopkup_api_call(search_query):
 	search_query = search_query.replace(' ', '%20')
 	url = "http://api.walmartlabs.com/v1/search?apiKey=vydf8ym75f468rbgwy5k5xwp&query=" + search_query
-	data = json.load(urllib2.urlopen(url))
+	data = json.load(urlopen(url))
 	return_dict = {}
 
 	for item in data['items']:
@@ -122,7 +122,7 @@ def make_product_loopkup_api_call(search_query):
 def make_product_reviews_api_call(item_id):
 	review_url = "http://api.walmartlabs.com/v1/reviews/%s?apiKey=vydf8ym75f468rbgwy5k5xwp&format=json" % str(item_id)
 	reviews = []
-	review_data = json.load(urllib2.urlopen(review_url))
+	review_data = json.load(urlopen(review_url))
 	for review in review_data['reviews']:
 		reviews.append(review['reviewText'])
 
