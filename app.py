@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, g
 from nltk.corpus import stopwords
 import os
 import json
+import re
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
@@ -163,7 +164,14 @@ def review_query_request_handler(review_item_id, review_query):
 
 	mutual_info = MutualInformation(txt_data=reviews, search_query=review_query)
 
-	reviews_dict = {'review_query' : review_query, 'reviews' : [], 'summary' : mutual_info.summary}
+	summary_split = mutual_info.summary.split(' ')
+	summary_with_links = [
+		'<a target="_blank" href="' + '/summary_handler/%s/%s/%s' % (summary_word, review_query, reviews) + '">' + summary_word + '</a>'
+		for summary_word in summary_split
+	]
+
+	# reviews_dict = {'review_query' : review_query, 'reviews' : [], 'summary' : mutual_info.summary}
+	reviews_dict = {'review_query' : review_query, 'reviews' : [], 'summary' : ' '.join(summary_with_links)}
 
 	indexer = Indexer()
 	retrieved_review_ids = indexer.get_docs(review_query, item_id=review_item_id)
@@ -173,6 +181,12 @@ def review_query_request_handler(review_item_id, review_query):
 			reviews[review_id]
 		)
 	return render_template('reviews.html', reviews_dict=reviews_dict)
+
+@app.route('/summary_handler/<string:summary_word>/<string:review_query>/<string:reviews>')
+def summary_handler(summary_word, review_query, reviews):
+	review_query_terms = [re.sub(r'[^\w\s]','',s).lower() for s in review_query.split(' ')]
+	print (review_query_terms)
+	pass
 
 if __name__ == '__main__':
 	app.run(debug=True)
