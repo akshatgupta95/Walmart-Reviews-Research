@@ -162,16 +162,8 @@ def review_request_handler(review_item_id):
 def review_query_request_handler(review_item_id, review_query):
 	reviews = item_ids_to_reviews[review_item_id]
 
-	mutual_info = MutualInformation(txt_data=reviews, search_query=review_query)
-
-	summary_split = mutual_info.summary.split(' ')
-	summary_with_links = [
-		'<a target="_blank" href="' + '/summary_handler/%s/%s/%s' % (summary_word, review_query, reviews) + '">' + summary_word + '</a>'
-		for summary_word in summary_split
-	]
-
 	# reviews_dict = {'review_query' : review_query, 'reviews' : [], 'summary' : mutual_info.summary}
-	reviews_dict = {'review_query' : review_query, 'reviews' : [], 'summary' : ' '.join(summary_with_links)}
+	reviews_dict = {'review_query' : review_query, 'reviews' : []}
 
 	indexer = Indexer()
 	retrieved_review_ids = indexer.get_docs(review_query, item_id=review_item_id)
@@ -180,12 +172,42 @@ def review_query_request_handler(review_item_id, review_query):
 		reviews_dict['reviews'].append(
 			reviews[review_id]
 		)
+
+	mutual_info = MutualInformation(txt_data=reviews, search_query=review_query)
+	summary_split = mutual_info.summary.split(' ')
+	summary_with_links = [
+		'<a target="_blank" href="' + '/summary_handler/%s/%s/%s' % (summary_word, review_query, review_item_id) + '">' + summary_word + '</a>'
+		for summary_word in summary_split
+	]
+
+	reviews_dict['summary'] = ' '.join(summary_with_links)
+
 	return render_template('reviews.html', reviews_dict=reviews_dict)
 
-@app.route('/summary_handler/<string:summary_word>/<string:review_query>/<string:reviews>')
-def summary_handler(summary_word, review_query, reviews):
+@app.route('/summary_handler/<string:summary_word>/<string:review_query>/<string:review_item_id>')
+def summary_handler(summary_word, review_query, review_item_id):
+	reviews = item_ids_to_reviews[review_item_id]
+
+	indexer = Indexer()
+	retrieved_review_ids = indexer.get_docs(review_query, item_id=review_item_id)
+
+	filtered_reviews = []
+	for review_id in retrieved_review_ids:
+		filtered_reviews.append(
+			reviews[review_id]
+		)
+
 	review_query_terms = [re.sub(r'[^\w\s]','',s).lower() for s in review_query.split(' ')]
-	print (review_query_terms)
+	review_query_first_term = review_query_terms[0]
+
+	annotated_reviews = []
+	for review in reviews:
+		import pdb
+		pdb.set_trace()
+		review = [re.sub(r'[^\w\s]','',s).lower() for s in review.split(' ')]
+		review_query_first_term_idx = review.index(review_query_first_term)
+		summary_word_idx = review.index(summary_word)
+		print (review, review_query_first_term, summary_word, review_query_first_term_idx, summary_word_idx)
 	pass
 
 if __name__ == '__main__':
