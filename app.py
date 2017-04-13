@@ -200,13 +200,12 @@ def summary_handler(summary_word, review_query, review_item_id):
 	review_query_terms = [re.sub(r'[^\w\s]','',s).lower() for s in review_query.split(' ')]
 
 	annotated_reviews = []
-	for review in reviews:
+	for review in filtered_reviews:
 		review = [re.sub(r'[^\w\s]','',s).lower() for s in review.split(' ')]
 		
 		if summary_word in review:
 			summary_word_idx = review.index(summary_word)
 			i = summary_word_idx
-
 			while (review[i] not in review_query_terms):
 				i -= 1
 
