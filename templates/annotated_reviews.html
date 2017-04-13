@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Reviews</title>
+    <title>Annotated Reviews</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="../static/bootstrap.min.css" rel="stylesheet" media="screen">
   </head>
@@ -11,11 +11,11 @@
             <div class="row">
                 <div class="col-lg-12">
                     <strong>Showing Results for Keyword: </strong>{{ reviews_dict['review_query'] }} <br><br>
-                    <strong>Summary Generated: </strong>{{ reviews_dict['summary']|safe }} <br><br>
+                    <strong>Summary Word: </strong>{{ reviews_dict['summary_word'] }} <br><br>
                     <dl>
-                          {% for review in reviews_dict['reviews'] %}
+                          {% for review in reviews_dict['annotated_reviews'] %}
                                 <b>{{ loop.index }}</b>
-                                {{ review }}<br><br>
+                                {{ review|safe }}<br><br>
                           {% endfor %}
                     </dl>
                 </div>

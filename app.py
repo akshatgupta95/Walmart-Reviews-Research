@@ -198,17 +198,31 @@ def summary_handler(summary_word, review_query, review_item_id):
 		)
 
 	review_query_terms = [re.sub(r'[^\w\s]','',s).lower() for s in review_query.split(' ')]
-	review_query_first_term = review_query_terms[0]
 
 	annotated_reviews = []
 	for review in reviews:
-		import pdb
-		pdb.set_trace()
 		review = [re.sub(r'[^\w\s]','',s).lower() for s in review.split(' ')]
-		review_query_first_term_idx = review.index(review_query_first_term)
-		summary_word_idx = review.index(summary_word)
-		print (review, review_query_first_term, summary_word, review_query_first_term_idx, summary_word_idx)
-	pass
+		
+		if summary_word in review:
+			summary_word_idx = review.index(summary_word)
+			i = summary_word_idx
+
+			while (review[i] not in review_query_terms):
+				i -= 1
+
+			review = review[:i] + ['<b>'] + review[i:]
+			review = review[:summary_word_idx+2] + ['</b>'] + review[summary_word_idx+2:]
+
+		annotated_reviews.append(
+			' '.join(review)
+		)
+	
+	reviews_dict = {
+		'summary_word' : summary_word,
+		'review_query' : review_query,
+		'annotated_reviews' : annotated_reviews
+	}
+	return render_template('annotated_reviews.html', reviews_dict=reviews_dict)
 
 if __name__ == '__main__':
 	app.run(debug=True)
