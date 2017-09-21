@@ -11,7 +11,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <strong>Showing Results for Keyword: </strong>{{ reviews_dict['review_query'] }} <br><br>
-                    <strong>Summary Generated: </strong>{{ reviews_dict['summary']|safe }} <br><br>
+                    <strong>Related Words: </strong>{{ reviews_dict['summary']|safe }} <br><br>
                     <dl>
                           {% for review in reviews_dict['reviews'] %}
                                 <b>{{ loop.index }}</b>

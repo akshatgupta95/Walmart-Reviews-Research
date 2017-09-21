@@ -178,6 +178,7 @@ def review_query_request_handler(review_item_id, review_query):
 	summary_with_links = [
 		'<a target="_blank" href="' + '/summary_handler/%s/%s/%s' % (summary_word, review_query, review_item_id) + '">' + summary_word + '</a>'
 		for summary_word in summary_split
+		if summary_word not in stop
 	]
 
 	reviews_dict['summary'] = ' '.join(summary_with_links)
@@ -200,21 +201,25 @@ def summary_handler(summary_word, review_query, review_item_id):
 	review_query_terms = [re.sub(r'[^\w\s]','',s).lower() for s in review_query.split(' ')]
 
 	annotated_reviews = []
+	
 	for review in filtered_reviews:
 		filtered_review = review.split(' ')
 		review = [re.sub(r'[^\w\s]','',s).lower() for s in review.split(' ')]
+
+		idxs = [
+			review.index(review_query_term)
+			for review_query_term in review_query_terms
+		]
 		
 		if summary_word in review:
-			summary_word_idx = review.index(summary_word)
-			i = summary_word_idx
-			while (review[i] not in review_query_terms):
-				i -= 1
+			idxs.append(review.index(summary_word))
+			start_idx, end_idx = min(idxs), max(idxs)
 
-			review = filtered_review[:i] + ['<b>'] + filtered_review[i:]
-			review = review[:summary_word_idx+2] + ['</b>'] + review[summary_word_idx+2:]
+			annotated_review = filtered_review[:start_idx] + ['<b>'] + filtered_review[start_idx:]
+			annotated_review = annotated_review[:end_idx+2] + ['</b>'] + annotated_review[end_idx+2:]
 
 			annotated_reviews.append(
-				' '.join(review)
+				' '.join(annotated_review)
 			)
 		else:
 			annotated_reviews.append(
